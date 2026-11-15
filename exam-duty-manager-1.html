@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1a237e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Exam Duty Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1a237e;--pl:#3949ab;--acc:#ff6f00;--al:#ffa000;--bg:#f0f2ff;--card:#fff;--txt:#1a1a2e;--muted:#6b7280;--bdr:#e2e5f1;--ok:#00897b;--err:#e53935;--warn:#f57c00;--sh:0 4px 24px rgba(26,35,126,.10);--r:16px;--nh:68px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+h1,h2,h3,.brand{font-family:'Playfair Display',serif}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--primary);padding:14px 18px 12px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 16px rgba(26,35,126,.25)}
+.brand{font-size:1.2rem;color:#fff;letter-spacing:.5px}
+.subtitle{font-size:.68rem;color:rgba(255,255,255,.65);font-family:'Outfit',sans-serif}
+.topbar-r{display:flex;gap:7px;align-items:center}
+.tbtn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:20px;font-family:'Outfit',sans-serif;font-size:.75rem;cursor:pointer;font-weight:500;transition:.2s}
+.tbtn:hover{background:rgba(255,255,255,.28)}
+.tbtn.acc{background:var(--acc)}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:#fff;border-top:1px solid var(--bdr);display:flex;height:var(--nh);box-shadow:0 -4px 20px rgba(26,35,126,.08)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:.2s;color:var(--muted);font-size:.66rem;font-weight:500;border:none;background:none;padding:0}
+.ni.active{color:var(--primary)}
+.ni-icon{font-size:1.35rem;transition:.2s}
+.ni.active .ni-icon{transform:translateY(-2px)}
+.ndot{width:5px;height:5px;border-radius:50%;background:var(--acc);display:none}
+.ni.active .ndot{display:block}
+.screen{display:none;padding:88px 15px calc(var(--nh) + 20px);min-height:100vh}
+.screen.active{display:block}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:17px;margin-bottom:13px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.card-ttl{font-size:.97rem;font-weight:600;color:var(--primary)}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:13px}
+.sc{border-radius:var(--r);padding:17px 15px;color:#fff;position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;right:-18px;top:-18px;width:75px;height:75px;border-radius:50%;background:rgba(255,255,255,.08)}
+.sc.b{background:linear-gradient(135deg,var(--primary),var(--pl))}
+.sc.o{background:linear-gradient(135deg,var(--acc),var(--al))}
+.sc.g{background:linear-gradient(135deg,#00695c,#00897b)}
+.sc.p{background:linear-gradient(135deg,#4527a0,#7b1fa2)}
+.sn{font-size:2.1rem;font-weight:700;font-family:'Playfair Display',serif;line-height:1}
+.sl{font-size:.73rem;opacity:.85;margin-top:4px;font-weight:400}
+.si{font-size:1.45rem;margin-bottom:5px}
+.sbar{display:flex;gap:7px;margin-bottom:13px}
+.si-inp{flex:1;padding:11px 15px;border-radius:12px;border:2px solid var(--bdr);background:#fff;font-family:'Outfit',sans-serif;font-size:.87rem;outline:none;transition:.2s;color:var(--txt)}
+.si-inp:focus{border-color:var(--pl)}
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;padding:6px 13px;border-radius:20px;border:1.5px solid var(--bdr);background:#fff;font-size:.73rem;font-weight:500;cursor:pointer;transition:.2s;color:var(--muted)}
+.chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.tc{background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:9px;box-shadow:0 2px 12px rgba(26,35,126,.07);display:flex;align-items:flex-start;gap:13px;border-left:4px solid var(--pl);transition:.2s}
+.tc:hover{box-shadow:0 6px 20px rgba(26,35,126,.13)}
+.tav{width:45px;height:45px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--pl));display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.15rem;font-weight:700;flex-shrink:0;font-family:'Playfair Display',serif}
+.ti{flex:1;min-width:0}
+.tn{font-size:.93rem;font-weight:600;color:var(--txt);margin-bottom:3px}
+.tm{font-size:.73rem;color:var(--muted);line-height:1.6}
+.tm span{margin-right:7px}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.tag{font-size:.63rem;padding:2px 8px;border-radius:8px;background:#e8eaf6;color:var(--primary);font-weight:500}
+.tag.d{background:#fff3e0;color:var(--warn)}
+.tag.r{background:#e0f2f1;color:var(--ok)}
+.tact{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.ib{width:33px;height:33px;border-radius:10px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.88rem;transition:.2s}
+.be{background:#e8eaf6;color:var(--primary)}
+.bd{background:#ffebee;color:var(--err)}
+.bm{background:#e8f5e9;color:var(--ok)}
+.bx{background:#fff3e0;color:var(--warn)}
+.dtabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:13px;scrollbar-width:none;padding-bottom:2px}
+.dtabs::-webkit-scrollbar{display:none}
+.dtab{white-space:nowrap;padding:8px 15px;border-radius:10px;background:#fff;border:1.5px solid var(--bdr);font-size:.76rem;font-weight:600;cursor:pointer;transition:.2s;color:var(--muted)}
+.dtab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.di{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:12px;background:#fff;margin-bottom:7px;box-shadow:0 2px 8px rgba(26,35,126,.06);border-left:3px solid var(--acc)}
+.dt{font-size:.68rem;font-weight:600;color:var(--acc);background:#fff3e0;padding:4px 8px;border-radius:8px;white-space:nowrap}
+.dinfo{flex:1}
+.dname{font-size:.87rem;font-weight:600}
+.droom{font-size:.72rem;color:var(--muted);margin-top:2px}
+.nhdr{background:linear-gradient(135deg,var(--primary),var(--pl));border-radius:var(--r);padding:19px;color:#fff;margin-bottom:13px;display:flex;align-items:center;justify-content:space-between}
+.nst{text-align:center}
+.nsn{font-size:1.75rem;font-weight:700;font-family:'Playfair Display',serif}
+.nsl{font-size:.69rem;opacity:.8}
+.bbtn{background:var(--acc);color:#fff;border:none;padding:14px 18px;border-radius:14px;width:100%;font-family:'Outfit',sans-serif;font-size:.97rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:13px;transition:.2s;box-shadow:0 4px 16px rgba(255,111,0,.3)}
+.bbtn:hover{background:#e65100;transform:translateY(-1px)}
+.nitem{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:12px;background:#fff;margin-bottom:7px;box-shadow:0 2px 8px rgba(26,35,126,.06)}
+.nav2{width:39px;height:39px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--pl));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.97rem;font-weight:700;flex-shrink:0}
+.ninfo{flex:1}
+.nname{font-size:.87rem;font-weight:600}
+.nemail{font-size:.7rem;color:var(--muted)}
+.nst2{font-size:.63rem;padding:3px 9px;border-radius:8px;font-weight:600}
+.sent{background:#e8f5e9;color:var(--ok)}
+.pend{background:#fff3e0;color:var(--warn)}
+.sbtn{padding:7px 13px;border-radius:10px;border:none;background:var(--primary);color:#fff;font-family:'Outfit',sans-serif;font-size:.73rem;font-weight:600;cursor:pointer;transition:.2s}
+.sbtn:hover{background:var(--pl)}
+.exc-card{background:#fff;border-radius:14px;padding:15px;margin-bottom:9px;box-shadow:0 2px 12px rgba(26,35,126,.07);border-left:4px solid var(--warn)}
+.exc-badge{display:inline-flex;align-items:center;gap:5px;background:#fff3e0;color:var(--warn);font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:8px;margin-bottom:7px}
+.exl-item{padding:10px 13px;background:#fff;border-radius:12px;margin-bottom:7px;box-shadow:0 2px 8px rgba(26,35,126,.06);font-size:.79rem}
+.exl-room{font-weight:700;color:var(--primary);font-size:.87rem}
+.exl-meta{color:var(--muted);margin-top:3px;line-height:1.5}
+.exl-arrow{display:flex;align-items:center;gap:7px;margin:5px 0}
+.ef{background:#ffebee;color:var(--err);padding:3px 9px;border-radius:8px;font-weight:600;font-size:.73rem}
+.et{background:#e8f5e9;color:var(--ok);padding:3px 9px;border-radius:8px;font-weight:600;font-size:.73rem}
+.mo{display:none;position:fixed;inset:0;z-index:200;background:rgba(10,10,30,.55);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center}
+.mo.open{display:flex}
+.modal{background:#fff;border-radius:24px 24px 0 0;padding:22px 19px 30px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;animation:su .3s ease}
+@keyframes su{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.mh{width:38px;height:4px;border-radius:2px;background:#e0e0e0;margin:0 auto 17px}
+.mttl{font-size:1.15rem;font-weight:700;margin-bottom:17px;color:var(--primary)}
+.fg{margin-bottom:13px}
+.fl{font-size:.76rem;font-weight:600;color:var(--muted);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.fi,.fs{width:100%;padding:11px 13px;border-radius:12px;border:2px solid var(--bdr);background:#fafafa;font-family:'Outfit',sans-serif;font-size:.89rem;outline:none;transition:.2s;color:var(--txt)}
+.fi:focus,.fs:focus{border-color:var(--pl);background:#fff}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.dgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.dc{display:none}
+.dl{display:flex;align-items:center;justify-content:center;padding:8px 3px;border-radius:10px;border:2px solid var(--bdr);font-size:.7rem;font-weight:600;cursor:pointer;transition:.2s;color:var(--muted);text-align:center}
+.dc:checked+.dl{background:var(--primary);color:#fff;border-color:var(--primary)}
+.fact{display:flex;gap:9px;margin-top:18px}
+.btn{flex:1;padding:12px;border-radius:12px;border:none;font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:.2s}
+.bp{background:var(--primary);color:#fff}
+.bp:hover{background:var(--pl)}
+.bs{background:var(--bdr);color:var(--txt)}
+.exsc{background:#f5f7ff;border-radius:12px;padding:13px;border:2px solid var(--bdr);margin-bottom:9px;cursor:pointer;transition:.2s}
+.exsc.sel{border-color:var(--primary);background:#e8eaf6}
+.exsc .esn{font-weight:600;font-size:.88rem}
+.exsc .esm{font-size:.73rem;color:var(--muted);margin-top:2px}
+.eprev{background:#f5f7ff;border-radius:12px;padding:15px;font-size:.81rem;line-height:1.75;color:var(--txt);border:2px solid var(--bdr);margin-bottom:15px;white-space:pre-wrap}
+.esubj{background:#e8eaf6;border-radius:10px;padding:9px 13px;font-size:.8rem;font-weight:600;color:var(--primary);margin-bottom:9px}
+.cht{padding:7px 0}
+.cbg{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.clbl{font-size:.7rem;color:var(--muted);width:36px;text-align:right;flex-shrink:0}
+.ctrk{flex:1;background:#e8eaf6;border-radius:6px;height:21px;overflow:hidden}
+.cfill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:7px;transition:width 1s ease}
+.cval{font-size:.68rem;font-weight:600;color:#fff}
+.empty{text-align:center;padding:38px 18px;color:var(--muted)}
+.eico{font-size:2.8rem;margin-bottom:11px}
+.ettl{font-size:.97rem;font-weight:600;margin-bottom:5px;color:var(--txt)}
+.etxt{font-size:.8rem;line-height:1.6}
+.toast{position:fixed;bottom:calc(var(--nh) + 15px);left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a2e;color:#fff;padding:11px 20px;border-radius:12px;font-size:.83rem;font-weight:500;z-index:999;opacity:0;transition:.3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.fab{position:fixed;right:19px;bottom:calc(var(--nh) + 15px);width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,var(--acc),var(--al));border:none;color:#fff;font-size:1.55rem;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 20px rgba(255,111,0,.4);transition:.2s;z-index:90}
+.fab:hover{transform:scale(1.08)}
+.sh{font-size:.73rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:17px 0 9px 2px}
+.uzone{border:2px dashed var(--pl);border-radius:16px;padding:30px 18px;text-align:center;background:#f0f2ff;cursor:pointer;transition:.2s;margin-bottom:13px}
+.uzone:hover{background:#e8eaf6}
+.uico{font-size:2.4rem;margin-bottom:9px}
+.utxt{font-size:.87rem;color:var(--muted)}
+.uhint{font-size:.71rem;color:var(--pl);margin-top:3px}
+.div{height:1px;background:var(--bdr);margin:13px 0}
+.pr{position:relative}
+.badge{background:var(--err);color:#fff;font-size:.58rem;font-weight:700;padding:2px 5px;border-radius:6px;position:absolute;top:-4px;right:-4px}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:#c5c7d4;border-radius:4px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="brand">Exam Duty Manager</div>
+    <div class="subtitle">Teacher Schedule &amp; Notification System</div>
+  </div>
+  <div class="topbar-r">
+    <button class="tbtn" onclick="openUpload()">📂 Upload</button>
+    <button class="tbtn acc" onclick="broadcastAll()">📧 Broadcast</button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="sgrid">
+    <div class="sc b"><div class="si">👨‍🏫</div><div class="sn" id="st">0</div><div class="sl">Total Teachers</div></div>
+    <div class="sc o"><div class="si">🚪</div><div class="sn" id="sr">0</div><div class="sl">Exam Rooms</div></div>
+    <div class="sc g"><div class="si">🏢</div><div class="sn" id="sf">0</div><div class="sl">Floors Used</div></div>
+    <div class="sc p"><div class="si">📋</div><div class="sn" id="sd">0</div><div class="sl">Total Duties</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-ttl">Day-wise Duty Chart</div><span style="font-size:.73rem;color:var(--muted)">This Week</span></div>
+    <div class="cht" id="hchart"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-ttl">Floor-wise Distribution</div></div>
+    <div id="fchart" class="cht"></div>
+  </div>
+  <div class="sh">Recent Duty Exchanges</div>
+  <div id="recent-ex"></div>
+</div>
+
+<!-- TEACHERS -->
+<div class="screen" id="screen-teachers">
+  <div class="sbar">
+    <input class="si-inp" id="tsearch" placeholder="Search teachers..." oninput="renderTeachers()">
+  </div>
+  <div class="chips" id="fchips">
+    <div class="chip active" onclick="setFilter(this,'all')">All</div>
+    <div class="chip" onclick="setFilter(this,'Ground')">Ground</div>
+    <div class="chip" onclick="setFilter(this,'1st')">1st Floor</div>
+    <div class="chip" onclick="setFilter(this,'2nd')">2nd Floor</div>
+    <div class="chip" onclick="setFilter(this,'3rd')">3rd Floor</div>
+    <div class="chip" onclick="setFilter(this,'4th')">4th Floor</div>
+    <div class="chip" onclick="setFilter(this,'5th')">5th Floor</div>
+  </div>
+  <div id="tlist"></div>
+</div>
+
+<!-- SCHEDULE -->
+<div class="screen" id="screen-schedule">
+  <div class="dtabs" id="dtabs">
+    <div class="dtab active" onclick="setDay(this,'Saturday')">Sat</div>
+    <div class="dtab" onclick="setDay(this,'Sunday')">Sun</div>
+    <div class="dtab" onclick="setDay(this,'Monday')">Mon</div>
+    <div class="dtab" onclick="setDay(this,'Tuesday')">Tue</div>
+    <div class="dtab" onclick="setDay(this,'Wednesday')">Wed</div>
+    <div class="dtab" onclick="setDay(this,'Thursday')">Thu</div>
+    <div class="dtab" onclick="setDay(this,'Friday')">Fri</div>
+  </div>
+  <div id="slist"></div>
+</div>
+
+<!-- NOTIFY -->
+<div class="screen" id="screen-notify">
+  <div class="nhdr">
+    <div class="nst"><div class="nsn" id="ntot">0</div><div class="nsl">Total</div></div>
+    <div class="nst"><div class="nsn" id="nsent">0</div><div class="nsl">Sent</div></div>
+    <div class="nst"><div class="nsn" id="npend">0</div><div class="nsl">Pending</div></div>
+  </div>
+  <button class="bbtn" onclick="broadcastAll()">📧 Send Email to All Teachers — 1-Click Broadcast</button>
+  <div class="sh">Individual Notifications</div>
+  <div id="nlist"></div>
+</div>
+
+<!-- EXCHANGE -->
+<div class="screen" id="screen-exchange">
+  <div class="card">
+    <div class="card-ttl" style="margin-bottom:9px">🔄 Assign Duty Exchange</div>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:13px;line-height:1.6">When a teacher cannot attend their assigned duty, select their room and assign a replacement teacher.</p>
+    <div class="fg">
+      <label class="fl">Original Room &amp; Duty</label>
+      <select class="fs" id="ex-sel" onchange="populateFrom()">
+        <option value="">-- Select Room --</option>
+      </select>
+    </div>
+    <div id="ex-orig" style="display:none" class="exc-card">
+      <div class="exc-badge">⚠️ Cannot Attend</div>
+      <div id="ex-orig-detail"></div>
+    </div>
+    <div class="fg" id="ex-rep-grp" style="display:none">
+      <label class="fl">Select Replacement Teacher</label>
+      <div id="ex-rep-list"></div>
+    </div>
+    <button class="btn bp" id="ex-ok" style="display:none;width:100%" onclick="confirmExchange()">✅ Confirm Exchange &amp; Notify</button>
+  </div>
+  <div class="sh">Exchange History</div>
+  <div id="ex-hist"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="ni active" onclick="showScreen('home',this)">
+    <div class="ni-icon">🏠</div><div>Home</div><div class="ndot"></div>
+  </button>
+  <button class="ni" onclick="showScreen('teachers',this)">
+    <div class="ni-icon">👨‍🏫</div><div>Teachers</div><div class="ndot"></div>
+  </button>
+  <button class="ni" onclick="showScreen('schedule',this)">
+    <div class="ni-icon">📅</div><div>Schedule</div><div class="ndot"></div>
+  </button>
+  <button class="ni" onclick="showScreen('notify',this)">
+    <div class="ni-icon pr">📧<span class="badge" id="pbadge" style="display:none">!</span></div>
+    <div>Notify</div><div class="ndot"></div>
+  </button>
+  <button class="ni" onclick="showScreen('exchange',this)">
+    <div class="ni-icon">🔄</div><div>Exchange</div><div class="ndot"></div>
+  </button>
+</nav>
+
+<button class="fab" onclick="openAdd()" title="Add Teacher">+</button>
+<div class="toast" id="toast"></div>
+
+<!-- ADD/EDIT TEACHER MODAL -->
+<div class="mo" id="mo-teacher">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mttl" id="mttl">Add New Teacher</div>
+    <input type="hidden" id="eid">
+    <div class="frow">
+      <div class="fg"><label class="fl">Full Name *</label><input class="fi" id="fn" placeholder="Teacher name"></div>
+      <div class="fg"><label class="fl">Mobile</label><input class="fi" id="fm" placeholder="01XXXXXXXXX" type="tel"></div>
+    </div>
+    <div class="fg"><label class="fl">Email Address</label><input class="fi" id="fe" placeholder="teacher@school.edu" type="email"></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Room Number *</label><input class="fi" id="fr" placeholder="e.g. 603"></div>
+      <div class="fg"><label class="fl">Floor *</label>
+        <select class="fs" id="ff">
+          <option>Ground</option><option>1st</option><option>2nd</option><option>3rd</option>
+          <option>4th</option><option>5th</option><option>6th</option><option>7th</option>
+          <option>8th</option><option>9th</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Time Slot</label>
+      <select class="fs" id="ft">
+        <option value="9:00 AM - 12:00 PM">Morning: 9:00 AM – 12:00 PM</option>
+        <option value="12:00 PM - 3:00 PM">Afternoon: 12:00 PM – 3:00 PM</option>
+        <option value="3:00 PM - 6:00 PM">Evening: 3:00 PM – 6:00 PM</option>
+        <option value="9:00 AM - 1:00 PM">Full AM: 9:00 AM – 1:00 PM</option>
+        <option value="9:00 AM - 3:00 PM">Full Day: 9:00 AM – 3:00 PM</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Duty Days</label>
+      <div class="dgrid">
+        <input type="checkbox" class="dc" id="dsat" value="Saturday"><label class="dl" for="dsat">Sat</label>
+        <input type="checkbox" class="dc" id="dsun" value="Sunday"><label class="dl" for="dsun">Sun</label>
+        <input type="checkbox" class="dc" id="dmon" value="Monday"><label class="dl" for="dmon">Mon</label>
+        <input type="checkbox" class="dc" id="dtue" value="Tuesday"><label class="dl" for="dtue">Tue</label>
+        <input type="checkbox" class="dc" id="dwed" value="Wednesday"><label class="dl" for="dwed">Wed</label>
+        <input type="checkbox" class="dc" id="dthu" value="Thursday"><label class="dl" for="dthu">Thu</label>
+        <input type="checkbox" class="dc" id="dfri" value="Friday"><label class="dl" for="dfri">Fri</label>
+      </div>
+    </div>
+    <div class="fact">
+      <button class="btn bs" onclick="closeM('mo-teacher')">Cancel</button>
+      <button class="btn bp" onclick="saveTeacher()">Save Teacher</button>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL MODAL -->
+<div class="mo" id="mo-email">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mttl">📧 Email Preview</div>
+    <div class="esubj" id="esubj"></div>
+    <div class="eprev" id="ebody"></div>
+    <div id="eto" style="font-size:.76rem;color:var(--muted);margin-bottom:13px"></div>
+    <div class="fact">
+      <button class="btn bs" onclick="closeM('mo-email')">Close</button>
+      <button class="btn bp" onclick="markSent()">✓ Mark as Sent</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="mo" id="mo-upload">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mttl">📂 Upload Duty Sheet</div>
+    <div class="uzone" onclick="document.getElementById('ufile').click()">
+      <div class="uico">📄</div>
+      <div class="utxt">Tap to upload Duty Sheet</div>
+      <div class="uhint">Supports: Image (JPG/PNG) · PDF · DOCX</div>
+    </div>
+    <input type="file" id="ufile" accept="image/*,.pdf,.docx" style="display:none" onchange="handleUpload(this)">
+    <div id="ures" style="display:none">
+      <div class="fg">
+        <label class="fl">Paste / Type Data Here</label>
+        <textarea class="fi" id="utxt" rows="5" style="resize:vertical" placeholder="Format per line:
+Name | Email | Room | Floor | Days | Time
+
+Example:
+Jane Smith | jane@school.edu | 603 | 3rd | Saturday,Sunday | 9:00 AM - 12:00 PM"></textarea>
+      </div>
+      <button class="btn bp" style="width:100%" onclick="parseData()">✅ Parse &amp; Save All</button>
+    </div>
+    <div class="div"></div>
+    <p style="font-size:.73rem;color:var(--muted);text-align:center;line-height:1.6">Each line: <strong>Name | Email | Room | Floor | Days | Time</strong></p>
+    <button class="btn bs" style="width:100%;margin-top:9px" onclick="document.getElementById('ures').style.display='block'">✏️ Enter Data Manually</button>
+    <button class="btn bs" style="width:100%;margin-top:7px" onclick="closeM('mo-upload')">Close</button>
+  </div>
+</div>
+
+<!-- BROADCAST MODAL -->
+<div class="mo" id="mo-bc">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mttl">📢 Broadcast to All Teachers</div>
+    <div style="background:#fff3e0;border-radius:12px;padding:13px;margin-bottom:15px;font-size:.83rem;line-height:1.6;color:#e65100">
+      This will mark email notification as <strong>sent</strong> for <strong id="bc-cnt">0</strong> teachers. Connect to an email server for real delivery.
+    </div>
+    <div class="esubj">📧 Subject: Exam Duty Assignment — Your Schedule</div>
+    <div class="eprev" id="bc-prev" style="max-height:150px;overflow-y:auto;font-size:.76rem"></div>
+    <div class="fact">
+      <button class="btn bs" onclick="closeM('mo-bc')">Cancel</button>
+      <button class="btn bp" onclick="execBC()" style="background:var(--acc)">🚀 Send to All</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let T=JSON.parse(localStorage.getItem('edm-t')||'[]');
+let EX=JSON.parse(localStorage.getItem('edm-ex')||'[]');
+let SENT=new Set(JSON.parse(localStorage.getItem('edm-s')||'[]'));
+let curDay='Saturday',curFilter='all',editId=null,curEmailId=null;
+let selFrom=null,selTo=null;
+
+function save(){
+  localStorage.setItem('edm-t',JSON.stringify(T));
+  localStorage.setItem('edm-ex',JSON.stringify(EX));
+  localStorage.setItem('edm-s',JSON.stringify([...SENT]));
+}
+
+function showScreen(n,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
+  document.getElementById('screen-'+n).classList.add('active');
+  btn.classList.add('active');
+  ({home:renderHome,teachers:renderTeachers,schedule:renderSchedule,notify:renderNotify,exchange:renderExchange})[n]?.();
+}
+
+function renderHome(){
+  const rooms=[...new Set(T.map(t=>t.room))];
+  const floors=[...new Set(T.map(t=>t.floor))];
+  const duties=T.reduce((a,t)=>a+(t.days||[]).length,0);
+  document.getElementById('st').textContent=T.length;
+  document.getElementById('sr').textContent=rooms.length;
+  document.getElementById('sf').textContent=floors.length;
+  document.getElementById('sd').textContent=duties;
+  const days=['Saturday','Sunday','Monday','Tuesday','Wednesday','Thursday','Friday'];
+  const ds=['Sat','Sun','Mon','Tue','Wed','Thu','Fri'];
+  const dc=days.map(d=>T.filter(t=>(t.days||[]).includes(d)).length);
+  const mx=Math.max(...dc,1);
+  const cols=['#3949ab','#1e88e5','#00897b','#f57c00','#8e24aa','#e53935','#039be5'];
+  document.getElementById('hchart').innerHTML=days.map((d,i)=>`
+    <div class="cbg"><div class="clbl">${ds[i]}</div>
+    <div class="ctrk"><div class="cfill" style="width:${(dc[i]/mx)*100}%;background:${cols[i]}">
+    <span class="cval">${dc[i]||''}</span></div></div></div>`).join('');
+  const fn=['Ground','1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
+  const fc=fn.map(f=>T.filter(t=>t.floor===f).length);
+  const mf=Math.max(...fc,1);
+  document.getElementById('fchart').innerHTML=fn.map((f,i)=>fc[i]>0?`
+    <div class="cbg"><div class="clbl" style="font-size:.63rem">${f}</div>
+    <div class="ctrk"><div class="cfill" style="width:${(fc[i]/mf)*100}%;background:var(--acc)">
+    <span class="cval">${fc[i]}</span></div></div></div>`:``).join('');
+  const el=document.getElementById('recent-ex');
+  if(!EX.length){el.innerHTML=`<div class="empty"><div class="eico">🔄</div><div class="ettl">No exchanges yet</div></div>`;return;}
+  el.innerHTML=[...EX].reverse().slice(0,3).map(e=>`
+    <div class="exl-item">
+      <div class="exl-room">Room ${e.room} — ${e.floor} Floor</div>
+      <div class="exl-meta">${e.days.join(', ')} · ${e.time}</div>
+      <div class="exl-arrow"><span class="ef">❌ ${e.fromName}</span><span style="font-size:1.1rem">→</span><span class="et">✅ ${e.toName}</span></div>
+      <div style="font-size:.68rem;color:var(--muted)">${e.date}</div>
+    </div>`).join('');
+}
+
+function renderTeachers(){
+  const q=(document.getElementById('tsearch').value||'').toLowerCase();
+  const list=T.filter(t=>{
+    const mq=!q||t.name.toLowerCase().includes(q)||(t.room||'').includes(q);
+    const mf=curFilter==='all'||t.floor===curFilter;
+    return mq&&mf;
+  });
+  const el=document.getElementById('tlist');
+  if(!list.length){el.innerHTML=`<div class="empty"><div class="eico">👨‍🏫</div><div class="ettl">No teachers found</div><div class="etxt">Add a teacher using the + button</div></div>`;return;}
+  el.innerHTML=list.map(t=>`
+    <div class="tc">
+      <div class="tav">${t.name.charAt(0)}</div>
+      <div class="ti">
+        <div class="tn">${t.name}</div>
+        <div class="tm"><span>🚪 Room ${t.room}</span><span>🏢 ${t.floor} Floor</span>${t.mobile?`<span>📞 ${t.mobile}</span>`:''}</div>
+        <div class="tm">${t.email||'<em style="color:#ccc">No email</em>'}</div>
+        <div class="tags">
+          <span class="tag r">⏰ ${t.time}</span>
+          ${(t.days||[]).map(d=>`<span class="tag d">${d.slice(0,3)}</span>`).join('')}
+        </div>
+      </div>
+      <div class="tact">
+        <button class="ib bm" onclick="previewEmail('${t.id}')" title="Email">📧</button>
+        <button class="ib bx" onclick="qExchange('${t.id}')" title="Exchange">🔄</button>
+        <button class="ib be" onclick="openEdit('${t.id}')" title="Edit">✏️</button>
+        <button class="ib bd" onclick="delT('${t.id}')" title="Delete">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+function setFilter(el,v){
+  curFilter=v;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderTeachers();
+}
+
+function openAdd(){
+  editId=null;
+  document.getElementById('mttl').textContent='Add New Teacher';
+  ['fn','fm','fe','fr'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ff').value='Ground';
+  document.getElementById('ft').value='9:00 AM - 12:00 PM';
+  document.querySelectorAll('.dc').forEach(c=>c.checked=false);
+  document.getElementById('mo-teacher').classList.add('open');
+}
+
+function openEdit(id){
+  const t=T.find(x=>x.id===id);if(!t)return;
+  editId=id;
+  document.getElementById('mttl').textContent='Edit Teacher';
+  document.getElementById('fn').value=t.name;
+  document.getElementById('fm').value=t.mobile||'';
+  document.getElementById('fe').value=t.email||'';
+  document.getElementById('fr').value=t.room;
+  document.getElementById('ff').value=t.floor;
+  document.getElementById('ft').value=t.time;
+  document.querySelectorAll('.dc').forEach(c=>c.checked=(t.days||[]).includes(c.value));
+  document.getElementById('mo-teacher').classList.add('open');
+}
+
+function saveTeacher(){
+  const name=document.getElementById('fn').value.trim();
+  const room=document.getElementById('fr').value.trim();
+  if(!name||!room){showToast('⚠️ Name and Room are required!');return;}
+  const days=[...document.querySelectorAll('.dc:checked')].map(c=>c.value);
+  const d={id:editId||Date.now().toString()+Math.random().toString(36).slice(2),name,room,
+    mobile:document.getElementById('fm').value.trim(),
+    email:document.getElementById('fe').value.trim(),
+    floor:document.getElementById('ff').value,
+    time:document.getElementById('ft').value,days};
+  if(editId){T[T.findIndex(x=>x.id===editId)]=d;showToast('✅ Teacher updated!');}
+  else{T.push(d);showToast('✅ Teacher added!');}
+  save();closeM('mo-teacher');renderTeachers();renderHome();badge();
+}
+
+function delT(id){
+  if(!confirm('Delete this teacher?'))return;
+  T=T.filter(x=>x.id!==id);SENT.delete(id);
+  save();renderTeachers();renderHome();badge();showToast('🗑️ Teacher removed.');
+}
+
+function setDay(el,day){
+  curDay=day;
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');renderSchedule();
+}
+
+function renderSchedule(){
+  const list=T.filter(t=>(t.days||[]).includes(curDay)).sort((a,b)=>a.room.localeCompare(b.room,undefined,{numeric:true}));
+  const el=document.getElementById('slist');
+  if(!list.length){el.innerHTML=`<div class="empty"><div class="eico">📅</div><div class="ettl">No duties on ${curDay}</div><div class="etxt">No teachers assigned for this day</div></div>`;return;}
+  el.innerHTML=list.map(t=>{
+    const ex=EX.find(e=>e.room===t.room);
+    return`<div class="di" style="${ex?'border-left-color:var(--warn)':''}">
+      <div class="dt">${t.time.split(' ')[0]}</div>
+      <div class="dinfo">
+        <div class="dname">${ex?ex.toName:t.name} ${ex?'🔄':''}</div>
+        <div class="droom">Room ${t.room} · ${t.floor} Floor · ${t.time}</div>
+        ${ex?`<div style="font-size:.66rem;color:var(--warn);margin-top:2px">Replaced: ${ex.fromName}</div>`:''}
+      </div>
+      <button class="ib bm" onclick="previewEmail('${t.id}')" style="font-size:.78rem">📧</button>
+    </div>`;
+  }).join('');
+}
+
+function renderNotify(){
+  const sent=T.filter(t=>SENT.has(t.id)).length;
+  const pend=T.length-sent;
+  document.getElementById('ntot').textContent=T.length;
+  document.getElementById('nsent').textContent=sent;
+  document.getElementById('npend').textContent=pend;
+  badge();
+  const el=document.getElementById('nlist');
+  if(!T.length){el.innerHTML=`<div class="empty"><div class="eico">📧</div><div class="ettl">No teachers yet</div><div class="etxt">Add teachers first</div></div>`;return;}
+  el.innerHTML=T.map(t=>{const s=SENT.has(t.id);return`
+    <div class="nitem">
+      <div class="nav2">${t.name.charAt(0)}</div>
+      <div class="ninfo"><div class="nname">${t.name}</div><div class="nemail">${t.email||'No email set'}</div></div>
+      <span class="nst2 ${s?'sent':'pend'}">${s?'✓ Sent':'⏳ Pending'}</span>
+      <button class="sbtn" onclick="previewEmail('${t.id}')">📧</button>
+    </div>`;}).join('');
+}
+
+function badge(){
+  const p=T.filter(t=>!SENT.has(t.id)).length;
+  document.getElementById('pbadge').style.display=p>0?'block':'none';
+}
+
+function emailBody(t){return`Dear ${t.name},
+
+This is to inform you of your assigned exam duty schedule.
+
+─────────────────────────────
+  EXAM DUTY NOTIFICATION
+─────────────────────────────
+Teacher : ${t.name}
+Room    : ${t.room}
+Floor   : ${t.floor} Floor
+Time    : ${t.time}
+Days    : ${(t.days||[]).join(', ')||'Not specified'}
+─────────────────────────────
+
+Please ensure your presence at the assigned room and time.
+If you are unable to attend, kindly inform the exam controller immediately to arrange a substitute.
+
+Thank you for your cooperation.
+
+Best regards,
+Exam Control Committee`;}
+
+function previewEmail(id){
+  const t=T.find(x=>x.id===id);if(!t)return;
+  curEmailId=id;
+  document.getElementById('esubj').textContent=`Subject: Exam Duty Assignment — ${t.name}`;
+  document.getElementById('ebody').textContent=emailBody(t);
+  document.getElementById('eto').textContent=`To: ${t.email||'⚠️ No email — please update teacher info'}`;
+  document.getElementById('mo-email').classList.add('open');
+}
+
+function markSent(){
+  if(curEmailId){SENT.add(curEmailId);save();closeM('mo-email');renderNotify();showToast('✅ Marked as sent!');}
+}
+
+function broadcastAll(){
+  if(!T.length){showToast('⚠️ No teachers added yet!');return;}
+  document.getElementById('bc-cnt').textContent=T.length;
+  const prev=T.slice(0,3).map(t=>`• ${t.name} → ${t.email||'No email'} (Room ${t.room})`).join('\n')
+    +(T.length>3?`\n... and ${T.length-3} more`:'');
+  document.getElementById('bc-prev').textContent=prev;
+  document.getElementById('mo-bc').classList.add('open');
+}
+
+function execBC(){
+  T.forEach(t=>SENT.add(t.id));
+  save();closeM('mo-bc');renderNotify();showToast(`📧 Broadcast sent to ${T.length} teachers!`);
+}
+
+function renderExchange(){
+  const sel=document.getElementById('ex-sel');
+  sel.innerHTML='<option value="">-- Select Room --</option>'+T.map(t=>`<option value="${t.id}">Room ${t.room} — ${t.name} (${t.floor} Floor)</option>`).join('');
+  renderExHist();
+}
+
+function populateFrom(){
+  const id=document.getElementById('ex-sel').value;
+  const t=T.find(x=>x.id===id);
+  if(!t){['ex-orig','ex-rep-grp'].forEach(x=>document.getElementById(x).style.display='none');document.getElementById('ex-ok').style.display='none';return;}
+  selFrom=t;selTo=null;
+  document.getElementById('ex-orig').style.display='block';
+  document.getElementById('ex-orig-detail').innerHTML=`
+    <div style="font-weight:600;font-size:.88rem">${t.name}</div>
+    <div style="font-size:.76rem;color:var(--muted);margin-top:3px">Room ${t.room} · ${t.floor} Floor · ${t.time}<br>${(t.days||[]).join(', ')}</div>`;
+  const others=T.filter(x=>x.id!==id);
+  document.getElementById('ex-rep-grp').style.display='block';
+  document.getElementById('ex-rep-list').innerHTML=others.length?others.map(r=>`
+    <div class="exsc" id="ec-${r.id}" onclick="selRep('${r.id}')">
+      <div class="esn">${r.name}</div>
+      <div class="esm">Room ${r.room} · ${r.floor} Floor · ${r.time}</div>
+    </div>`).join(''):'<p style="font-size:.8rem;color:var(--muted)">No other teachers available.</p>';
+  document.getElementById('ex-ok').style.display='none';
+}
+
+function selRep(id){
+  selTo=T.find(x=>x.id===id);
+  document.querySelectorAll('.exsc').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('ec-'+id).classList.add('sel');
+  document.getElementById('ex-ok').style.display='block';
+}
+
+function confirmExchange(){
+  if(!selFrom||!selTo)return;
+  EX.push({id:Date.now().toString(),room:selFrom.room,floor:selFrom.floor,days:selFrom.days||[],time:selFrom.time,
+    fromId:selFrom.id,fromName:selFrom.name,toId:selTo.id,toName:selTo.name,
+    date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})});
+  save();showToast(`✅ Exchange confirmed! ${selTo.name} → Room ${selFrom.room}`);
+  document.getElementById('ex-sel').value='';
+  ['ex-orig','ex-rep-grp'].forEach(x=>document.getElementById(x).style.display='none');
+  document.getElementById('ex-ok').style.display='none';
+  selFrom=null;selTo=null;renderExHist();renderHome();
+}
+
+function renderExHist(){
+  const el=document.getElementById('ex-hist');
+  if(!EX.length){el.innerHTML=`<div class="empty"><div class="eico">🔄</div><div class="ettl">No exchanges recorded</div></div>`;return;}
+  el.innerHTML=[...EX].reverse().map(e=>`
+    <div class="exl-item">
+      <div class="exl-room">Room ${e.room} — ${e.floor} Floor</div>
+      <div class="exl-meta">${e.days.join(', ')} · ${e.time}</div>
+      <div class="exl-arrow"><span class="ef">❌ ${e.fromName}</span><span style="font-size:1.1rem">→</span><span class="et">✅ ${e.toName}</span></div>
+      <div style="font-size:.68rem;color:var(--muted)">${e.date}</div>
+      <button onclick="delEx('${e.id}')" style="margin-top:5px;background:#ffebee;color:var(--err);border:none;padding:4px 11px;border-radius:8px;font-size:.7rem;cursor:pointer">Remove</button>
+    </div>`).join('');
+}
+
+function delEx(id){EX=EX.filter(x=>x.id!==id);save();renderExHist();renderHome();showToast('Exchange removed.');}
+function qExchange(id){showScreen('exchange',document.querySelectorAll('.ni')[4]);setTimeout(()=>{document.getElementById('ex-sel').value=id;populateFrom();},100);}
+
+function openUpload(){document.getElementById('ures').style.display='none';document.getElementById('utxt').value='';document.getElementById('mo-upload').classList.add('open');}
+function handleUpload(inp){if(!inp.files.length)return;document.getElementById('ures').style.display='block';showToast(`📂 File "${inp.files[0].name}" selected. Enter data below.`);}
+function parseData(){
+  const raw=document.getElementById('utxt').value.trim();
+  if(!raw){showToast('⚠️ Please enter some data!');return;}
+  const lines=raw.split('\n').filter(l=>l.trim()&&l.includes('|'));
+  if(!lines.length){showToast('⚠️ Use format: Name | Email | Room | Floor | Days | Time');return;}
+  let added=0;
+  lines.forEach(line=>{
+    const p=line.split('|').map(x=>x.trim());
+    if(p.length<3)return;
+    const[name,email,room,floor,dRaw,time]=p;
+    if(!name||!room)return;
+    T.push({id:Date.now().toString()+Math.random().toString(36).slice(2),name,email:email||'',room,
+      floor:floor||'Ground',days:dRaw?dRaw.split(',').map(d=>d.trim()).filter(Boolean):[],
+      time:time||'9:00 AM - 12:00 PM',mobile:''});
+    added++;
+  });
+  save();closeM('mo-upload');renderTeachers();renderHome();badge();showToast(`✅ ${added} teacher(s) added!`);
+}
+
+function closeM(id){document.getElementById(id).classList.remove('open');}
+let toastT;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800);}
+document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+renderHome();renderTeachers();badge();
+</script>
+</body>
+</html>
